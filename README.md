@@ -7,8 +7,7 @@ The current version v1 (July, 2019) is the minimal one to reproduce the values i
 Towards future possible applications, we will implement several things such as automatic selection of Kernel function/derivatives of Kernel for y' and y" evaluation/extension to higher dimension/etc.
 
 #### Input format
-The sample file is input.jl
-
+The sample input files:
 <input.jl>
 numN=2000               # Number of particle for MC sampling. numN > 20,000 is recommended!
 mstep=2000              # Number of iteration of main step
