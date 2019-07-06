@@ -15,6 +15,13 @@ ENV["PLOTS_DEFAULT_BACKEND"] = "PyPlot"
 #using .ownplot
 
 println("input file:$inpname")
+println("numN:$numN step:$mstep\n\n")
+
+if occursin("N3LO",inpname); inttype="N3LO"
+elseif occursin("JISP16",inpname); inttype="JISP16"
+elseif occursin("NNLOopt",inpname); inttype="NNLOopt"
+else; inttype="unknownint";end
+println("inttype $inttype")
 ## Initialize global variables
 Tsigma,tTheta,xtrain,ytrain,xprd,xun,yun,oxtrain,oytrain,iThetas,lt,lp,Mysigma,muy,mstd=readinput(inpname)
 

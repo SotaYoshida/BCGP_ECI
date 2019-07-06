@@ -1,9 +1,3 @@
-# using LinearAlgebra 
-# using Distributions
-# using SpecialFunctions
-# using Printf
-# using StatsBase
-#export main,detR,KernelMat, Mchole,make_xyt,nu_t,weightedmean,ExtrapA,bn,Phi,singleGP,LAsample,Rcalc, oneGP, Resample
 function readinput(inpname)
     tmp=split(inpname,"_")[(length(split(inpname,"_")))]
     if Kernel=="logMatern" || Kernel=="logRBF"
@@ -73,7 +67,7 @@ function readinput(inpname)
     mstd=std(ytrain)
 
     xprd=Float64[];pNmax=[]
-    unx=collect(xtrain[lt]+2:2.0:50.0)
+    unx=collect(xtrain[lt]+2:2.0:xpMax)
     for tmp in unx 
         if (tmp in xtrain)==false 
             push!(xprd,tmp)
@@ -104,11 +98,9 @@ function main(xtrain,ytrain,yun,mstep,numN,Mysigma,muy,mstd)
     mujoint=zeros(Float64,lp+ld+ld2);Sjoint=ones(Float64,lp+ld+ld2,lp+ld+ld2)
     Pv=[ [iThetas[i],yprd,yd,yd2,-1.e+300,-1.e+5,-1.e+5,-1.e+5,-1.e+5,-1.e+5,mujoint,Sjoint] for i=1:numN]
     
-    Evars= [ 1.e-8 for i=1:lt]
     ytrain= (ytrain .-muy)/mstd
     NDist=Normal(R,sigR)
-    ydel = (ytrain[lt-1]-ytrain[lt])
-    
+    ydel = (ytrain[lt-1]-ytrain[lt])   
     println("xp",xprd," xt ", xtrain," yt ",ytrain," muy ",muy,"mstd",mstd, "lp,ld,ld2", lp," ",ld," ",ld2)
     for tstep=1:mstep
         if tstep<=2;achitT=0;achitY=0;end
@@ -240,14 +232,20 @@ function main(xtrain,ytrain,yun,mstep,numN,Mysigma,muy,mstd)
             s = @sprintf "%s %9.2f %s %9.2f %s %9.3e %9.3e " "Accept. ratio  T:" 100*achitT/(numN*(tstep-1)) " Y:" 100*achitY/(numN*(tstep-1)) " qT,qY= " cqT cqY
             println(s,"\n")
         end    
+        Summary(tstep,numN,xtrain,ytrain,xun,yun,xprd,xd,Pv,muy,mstd,"R")
+        E0,Evar=Summary(tstep,numN,xtrain,ytrain,xun,yun,xprd,xd,Pv,muy,mstd,"Theta")
     end
-    println("E(extrap):$E0  std:$Evar")
+    iot = open("Thetas_"*string(inttype)*".dat", "w")
+    for ith = 1:numN
+        println(iot,Pv[ith][1][1]," ",Pv[ith][1][2]," ",Pv[ith][5])
+    end
+    close(iot)
     return [E0,Evar]
 end
 
 function detR(xtrain,ytrain,yun,mstep,Mysigma,muy,mstd)
     global achitT,achitY,Tsigma,Pv
-    global E0,Evar, Wm, Ws
+    global Wm, Ws
     cqT=qT;cqY=qY
     tnumN=numN
     lt=length(xtrain)
@@ -264,7 +262,6 @@ function detR(xtrain,ytrain,yun,mstep,Mysigma,muy,mstd)
     iThetas=[ [100*rand(),30.0*rand()] for i=1:tnumN]
     Pv=[ [iThetas[i],yprd,yd,yd2,-1.e+300,-1.e+5,-1.e+5,-1.e+5,-1.e+5,-1.e+5,mujoint,Sjoint] for i=1:tnumN]
     
-    Evars= [ 1.e-8 for i=1:lt]
     ytrain= (ytrain .-muy)/mstd
     for tstep=1:Rstep
         if tstep<=2;achitT=0;achitY=0;end
@@ -377,7 +374,7 @@ function detR(xtrain,ytrain,yun,mstep,Mysigma,muy,mstd)
         if tstep == Rstep
             s = @sprintf "%s %9.2f %s %9.2f %s %9.3e %9.3e " "Acchit T:" 100*achitT/(tnumN*(tstep-1)) " Y:" 100*achitY/(tnumN*(tstep-1)) " qT,qY= " cqT cqY
             println(s)
-            Wm,Ws=Rcalc(tstep,tnumN,xtrain,ytrain,xun,yun,xprd,xd,Pv,muy,mstd,"R")       
+            Wm,Ws=Summary(tstep,tnumN,xtrain,ytrain,xun,yun,xprd,xd,Pv,muy,mstd,"R")       
         end    
     end    
     return Wm,Ws
@@ -1036,7 +1033,7 @@ end
 #     end
 #     return c_Thetas
 # end
-function Rcalc(tstep,numN,xt,yt,xun,yun,xprd,xd,Pv,muy,mstd,plttype)   
+function Summary(tstep,numN,xt,yt,xun,yun,xprd,xd,Pv,muy,mstd,plttype)   
     global bestPH,bestV,bestW, Wm, Ws
     lt=length(xt); lp=length(xprd); ld=length(xd)
     yprds= [ [0.0 for ith=1:numN] for kk=1:lp]
@@ -1103,20 +1100,18 @@ function Rcalc(tstep,numN,xt,yt,xun,yun,xprd,xd,Pv,muy,mstd,plttype)
             tstd  = sqrt(sum(w_yprd2s[kk]) - tmean*tmean )
         end
         means[kk]=tmean;stds[kk]=tstd
-    end
+    end    
+    # if plttype!="R"
+    #     println("Best Thetas:",bestV[1]," PH ",bestV[4]," llh= ",bestV[6]," logpost ",bestV[7]," logder ",bestV[8]," W ",bestW/sumW)
+    # end
     
-    if plttype!="R"
-        println("Best Thetas:",bestV[1]," PH ",bestV[4]," llh= ",bestV[6]," logpost ",bestV[7]," logder ",bestV[8]," W ",bestW/sumW)
-    end
-    
-    bestT,besty,bestyd=bestV[1],bestV[2]*mstd.+muy,bestV[3]*mstd.+muy
-    
+    bestT,besty,bestyd=bestV[1],bestV[2]*mstd.+muy,bestV[3]*mstd.+muy   
     Oyun = yun
     
     if tstep  == mstep
         Nmin=string( Int64(oxtrain[1])) 
         Nmax=string( Int64(oxtrain[length(oxtrain)]))
-        fn=tdir*"pic/Posterior_"*string(inpname)*".dat"
+        fn="Posterior_"*string(inttype)*".dat"
         io = open(fn, "w")
         println(io,inpname)
         println(io,"xprd=")
