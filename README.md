@@ -6,6 +6,14 @@ The aim of the code is to provide systematic and reasonable extrapolations for f
 The current version v1 (July, 2019) is the minimal one to reproduce the values in the paper.
 Towards future possible applications, we will implement several things such as automatic selection of Kernel function/derivatives of Kernel for y' and y" evaluation/extension to higher dimension/etc.
 
+My code works at least in the following environment:
+
+macOS Sierra 10.12.6 & macOS High Sierra 10.13.6
+
+Julia v1.0.3, Julia v1.1.0
+
+The author is not responsible for any type of troubles or damages caused by running the code.
+
 #### Input format
 The sample input files:
 
