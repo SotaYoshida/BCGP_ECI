@@ -62,6 +62,6 @@ The code now only supports the following format of FCI results.
 ### Outputs
 1. Posterior*.dat:       #Posterior distributions for y^* (mean and stds are summarized)
 
-2. Thetas*.dat:         #Hyperparameter distributions after mstep iteration of Metropolis-Hastings updates
+2. Thetas*.dat:         #Hyperparameter distributions after "mstep" iteration of Metropolis-Hastings updates
 
 Weights, Tau(global strength), Sigma(correlation length)
