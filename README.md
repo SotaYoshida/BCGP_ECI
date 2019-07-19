@@ -1,5 +1,5 @@
 #### BCGP_ECI
-BCGP_ECI(Bayesian Constrained Gaussian Proocess model for Extrapolations in CI methods) is the code used in the my paper, arXiv:XXXX.
+BCGP_ECI(Bayesian Constrained Gaussian Proocess model for Extrapolations in CI methods) is the code used in the my paper, arXiv:1907.04974.
 
 The aim of the code is to provide systematic and reasonable extrapolations for full CI and valence CI calculations.
 
