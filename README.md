@@ -6,7 +6,7 @@ The aim of the code is to provide systematic and reasonable extrapolations for f
 The current version v1 (July, 2019) is the minimal one to reproduce the values in the paper.
 Towards future possible applications, we will implement several things such as automatic selection of Kernel function/derivatives of Kernel for y' and y" evaluation/extension to higher dimension/etc.
 
-My code works at least in the following environment:
+This code works at least in the following environment:
 
 macOS Sierra 10.12.6 & macOS High Sierra 10.13.6
 
@@ -45,7 +45,7 @@ L12:rMH=[0.30,0.30]         # desired acceptance ratio for adaptive proposals
 
 L13:CImode ="NCSM"          # "MCSM" mode is now under construction
 
-L15:nuc="6Li"               # target nuclus (Not used: needed only for my own module to plot)
+L15:nuc="6Li"               # target nuclus (Not used: needed only for my own module to draw figures)
 
 L16:inpname="sample_ncsmdata.dat"    # input file
 
