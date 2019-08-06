@@ -20,47 +20,7 @@ The author is not responsible for any type of troubles or damages caused by runn
 One can now achieve calculations about 3 times faster than the previous version.
 
 #### Input format
-The sample input files:
-
-<input.jl>
-
-L1:numN=2000               # Number of particle for MC sampling. numN > 20,000 is recommended!
-
-L2:mstep=2000              # Number of iteration of main step
-
-L3:Rstep=500               # Number of iteration to calc. R_E
-
-L4:Kernel="logMatern"      # Kernel function "Lin+Mat"/"RQ"/"RBF"/"Matern"/"Mat32"/"logRBF"/"logMat32"/"NSMatern"/"logRQ"
-
-L5:sigfac=1                # R_E = Rmean + sigfac * Rstd
-
-L6:Auxiliary=false         # Not used
-
-L7:Monotonic=false         # Not used
-
-L8:Convex=false            # Not used
-
-L9:fixed=false             # To keep hyperparameters fixed (debug option)
-
-L10:printder=false          # Not used
-
-L11:multihw=false           # Not used
-
-L12:rMH=[0.30,0.30]         # Not used (desired acceptance ratio for adaptive proposals)
-
-L13:CImode ="NCSM"          # "MCSM" mode is now under construction
-
-L15:nuc="6Li"               # target nuclus (Not used: needed only for my own module to draw figures)
-
-L16:inpname="sample_ncsmdata.dat"    # input file
-
-L17:qT=1.e-1                # scale factor of proposal for hyperparameters
-
-L18:qY=1.e-3                # scale factor of proposal for predictions y*
-
-L19:qYfac = 5.e-3           # reduction factor of qY after "Resampling"
-
-L20:xpMax=46                # Maximum Nmax to be calculated. Start with large number and then decrease if you don't need the large number.
+The sample input for MC sampling: <input.jl>
 
 <sample_ncsmdata.dat>
 The code now only supports the following format of FCI results.
