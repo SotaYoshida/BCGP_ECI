@@ -19,6 +19,7 @@ The author is not responsible for any type of troubles or damages caused by runn
 
 One can now achieve calculations about 3 times faster than the previous version.
 
+
 #### Input format
 The sample input for MC sampling: <input.jl>
 
@@ -27,10 +28,10 @@ The code now only supports the following format of FCI results.
 
 [Nmax],[hbar omega],[g.s. Energy]
 
-
 ### How to run
+In the first time, execute $julia install_Pkgs.jl 
 1. Modify "input.jl"
-2. $julia bayesCGP_v1.jl
+2. $julia bayesCGP_vXX.jl
 
 ### Outputs
 1. Posterior*.dat:       #Posterior distributions for y^* (mean and stds are summarized)
