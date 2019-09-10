@@ -29,7 +29,7 @@ The code now only supports the following format of FCI results.
 [Nmax],[hbar omega],[g.s. Energy]
 
 ### How to run
-In the first time, execute $julia install_Pkgs.jl 
+For the first time, execute $julia install_Pkgs.jl 
 1. Modify "input.jl"
 2. $julia bayesCGP_vXX.jl
 
