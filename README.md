@@ -21,9 +21,9 @@ One can now achieve calculations about 3 times faster than the previous version.
 
 
 #### Input format
-The sample input for MC sampling: <input.jl>
+<input.jl>: settings for Monte Carlo sampling etc.
 
-<sample_ncsmdata.dat>
+<sample_ncsmdata.dat>: output of CI calculations
 The code now only supports the following format of FCI results.
 
 [Nmax],[hbar omega],[g.s. Energy]
