@@ -10,6 +10,10 @@ This code works at least in the following environment:
 macOS Sierra 10.12.6, macOS High Sierra 10.13.6, Mojave 10.14.6
 Julia v1.0.3, v1.1.0, v1.1.1
 
+One can obtain the published FCI results from 
+・(N3LO) M. K. G. Kruse, E. D. Jurgenson, P. Navrátil, B. R. Barrett, and W. E. Ormand, Phys. Rev. C 87, 044301 (2013).
+・(JISP16/NNLOopt) I. J. Shin, Y. Kim, P. Maris, J. P. Vary, C. Forssén, J. Ro- tureau, and N. Michel, Journal of Physics G: Nuclear and Particle Physics 44, 075103 (2017).
+
 #### !!!!
 #### The author is not responsible for any type of troubles or damages caused by running the code.
 #### !!!!
