@@ -1,5 +1,5 @@
 #### BCGP_ECI
-BCGP_ECI(Bayesian Constrained Gaussian Proocess model for Extrapolations in CI methods) is the code used in the my paper, arXiv:1907.04974.  
+BCGP_ECI(Bayesian Constrained Gaussian Proocess model for Extrapolations in CI methods) is the code used in the my paper, [arXiv:1907.04974v3].
 
 The aim of the code is to provide extrapolations for full CI (and valence CI calculations in a future version) with uncertainty quantification.  
 
@@ -8,7 +8,7 @@ Towards future possible applications, we will implement several things such as a
 
 This code works at least in the following environment:  
 macOS Catalina 10.15.3  
-Julia v1.3.1  
+Julia v1.3.1, v1.4.2 
 
 One can obtain the published FCI results from  
 ・(N3LO) M. K. G. Kruse, E. D. Jurgenson, P. Navrátil, B. R. Barrett, and W. E. Ormand, Phys. Rev. C 87, 044301 (2013).  
@@ -37,3 +37,7 @@ Then, execute $julia run.jl
 2. Thetas*.dat:         #Hyperparameter distributions after "mstep" iteration of Metropolis-Hastings updates
 
 Weights(in log), Tau(global strength), Sigma(correlation length)
+
+
+### 
+MKL.jl improves the execution time.
