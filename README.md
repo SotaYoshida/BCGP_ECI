@@ -9,15 +9,7 @@ Towards future possible applications, we will implement several things such as a
 This code works at least in the following environment:  
 macOS Catalina 10.15.3  
 Julia v1.3.1, v1.4.2 
-
-One can obtain the published FCI results from  
-・(N3LO) M. K. G. Kruse, E. D. Jurgenson, P. Navrátil, B. R. Barrett, and W. E. Ormand, Phys. Rev. C 87, 044301 (2013).  
-・(JISP16/NNLOopt) I. J. Shin, Y. Kim, P. Maris, J. P. Vary, C. Forssén, J. Ro- tureau, and N. Michel, Journal of Physics G: Nuclear and Particle Physics 44, 075103 (2017).  
-
-#### !!!!
-#### The author is not responsible for any type of troubles or damages caused by running the code.
-#### !!!!
-
+The author is not responsible for any type of troubles or damages caused by running the code.
 
 #### Input format
 <run.jl>: settings for Monte Carlo sampling etc.
@@ -34,10 +26,13 @@ Then, execute $julia run.jl
 ### Outputs
 1. Posterior*.dat:      #Posterior distributions for y^* (mean and stds are summarized)
 
-2. Thetas*.dat:         #Hyperparameter distributions after "mstep" iteration of Metropolis-Hastings updates
+2. Thetas*.dat:         #Hyperparameter distributions after "mstep" iteration of Metropolis-Hastings updates  
+Tau(global strength), Sigma(correlation length), sample weight, ...
 
-Weights(in log), Tau(global strength), Sigma(correlation length)
 
+### References
+One can obtain the published FCI results from  
+・(N3LO) M. K. G. Kruse, E. D. Jurgenson, P. Navrátil, B. R. Barrett, and W. E. Ormand, Phys. Rev. C 87, 044301 (2013).  
+・(JISP16/NNLOopt) I. J. Shin, Y. Kim, P. Maris, J. P. Vary, C. Forssén, J. Ro- tureau, and N. Michel, Journal of Physics G: Nuclear and Particle Physics 44, 075103 (2017).  
 
-### 
-MKL.jl improves the execution time.
+MKL.jl(https://github.com/JuliaComputing/MKL.jl) improves the execution time.
