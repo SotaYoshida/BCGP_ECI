@@ -55,7 +55,7 @@ end
 
 function Resample(iThetas::TTA, yprds::TTA,
                   PHs::T, logp0s::T, llhs::T, logposts::T,
-                  ders::TTA, mujs::TTA, SLs,SLinvs::TTA2,numN::I
+                  ders::TTA, mujs::TTA, SLs,SLinvs,numN::I
                   ) where {T<:Array{Float64,1},TTA<:Array{Array{Float64,1}},
                            TTA2<:Array{Array{Float64,2}},I<:Int64,F<:Float64}
     w_der=[0.0 for i=1:numN]
@@ -209,7 +209,7 @@ function main(mstep::I,numN::I,sigRfac::F,
     else 
         mu_yt = reshape([ 0.0 for i =1:lt],lt); mu_yp = reshape([ 0.0 for i =1:lp],lp)
     end
-    tlogprior=-1.e+30;tllh=-1.e+30;tlogpost=-1.e+30;tder=-1.e+30;tder2=-1.e+30
+    tlogprior=-1.e+20;tllh=-1.e+20;tlogpost=-1.e+20;tder=-1.e+20;tder2=-1.e+20
     tPH =  tlogprior + tllh + tlogpost + tder + tder2
     yprds= [ 0.0*xprd .- 1.e-2 for i=1:numN]
     PHs = [ tPH for i=1:numN]; logp0s = [tlogprior for i=1:numN]
@@ -224,12 +224,12 @@ function main(mstep::I,numN::I,sigRfac::F,
 
     muj0 = zeros(Float64,lp); Sj0 =zeros(Float64,lp,lp)
     mujs=[ muj0 for i=1:numN]
-    cLL = LowerTriangular(zeros(Float64,lt,lt))
-    cLp = LowerTriangular(zeros(Float64,lp,lp))    
-    SLs =[ cLp for i=1:numN]; logdetSjs=[ 1.e+30 for i=1:numN]
-    SLinvs =[ Sj0 for i=1:numN]
+    cLL = LowerTriangular(zeros(Float64,lt,lt));cLp = LowerTriangular(zeros(Float64,lp,lp))
+    cLtinv = LowerTriangular(zeros(Float64,lt,lt));cLpinv = LowerTriangular(zeros(Float64,lp,lp))    
+    SLs =[ cLp for i=1:numN]; logdetSjs=[ 1.e+20 for i=1:numN]
+    SLinvs =[ cLp for i=1:numN]; 
     AccT = [false]; fac0=[0.0]
-    ret = [-1.e+30,-1.e+30,-1.e+30, 1.e+30 ]
+    ret = [-1.e+20,-1.e+20,-1.e+20, 1.e+20 ]
     
     if paramean==true;NDist=Normal(0,0.01);else; NDist=Normal(R,5*sigR);end
 
@@ -255,18 +255,21 @@ function main(mstep::I,numN::I,sigRfac::F,
         initPH!(lt,lp,c_yprd,
                 iThetas[ith],prePH,difyt,mu_yp,
                 Ktt,Kpt,Kpp,muj0,Sj0,
-                cLL,cLp,Mpt,Mpp,vect,vecp,
+                cLL,cLp,Mtt,Mpt,Mtp,Mpp,vect,vecp,
                 AccT,ret)      
-        ## updated: cLL (L of Ktt) ret(logprior,llh,logpost) cLP (L of Sjoint)               ## muj0 Sj0
-        if AccT[1] 
+        ## updated: cLL (L of Ktt) ret(logprior,llh,logpost) cLP (L of Sjoint)
+        ## muj0 Sj0
+        if AccT[1]
             try            
                 myCholesky!(Sj0,lp,cLp) #updated cLp (L of Sj)
-                mul!(vecp,inv(cLp),c_yprd-muj0)
                 ret[4]=0.0 #logdetSj
                 @inbounds @simd for jj = 1:lp
                     ret[4] += 2.0*log(cLp[jj,jj])
-                end                
+                end
+                cLpinv = inv(cLp)
+                mul!(vecp,cLpinv,c_yprd-muj0)
                 ret[3] = -0.5 * dot(vecp,vecp)  - 0.5 * ret[4]
+
                 tder,tder2 = eval_der(tstep,mstep,xt,yt,
                                       xprd,c_yprd,mstd,R,sigR,Monotonic,Convex)
                 tlogprior=ret[1]; tllh=ret[2]; tlogpost=ret[3]; logdetSj=ret[4]
@@ -276,7 +279,7 @@ function main(mstep::I,numN::I,sigRfac::F,
                 yprds[ith]= copy(c_yprd)
                 mujs[ith]=muj0
                 SLs[ith] = deepcopy(cLp)
-                SLinvs[ith] = inv(cLp)
+                SLinvs[ith] = deepcopy(cLpinv)
                 logdetSjs[ith] = logdetSj
             catch
                 nothing
@@ -292,10 +295,10 @@ function main(mstep::I,numN::I,sigRfac::F,
             tder,tder2=ders[ith]
             tlogprior=logp0s[ith]
             tllh=llhs[ith]
-            tlogpost = logposts[ith]            
+            tlogpost = logposts[ith]
             #t1 = time()  ###
 
-            ###### Accept check for yprd ###
+            ###### Accept check for Hyperparameters ###
             updateTheta!(iThetas[ith],sigma_T,c_Theta)
             #t2 = time()  ###
             KernelMat!(ktype,c_Theta,xt,lt,xprd,lp,Rtt,Rpt,Rpp,Ktt,Kpt,Kpp,fac0,false) # Ktt,Kpt,Kpp is calculated
@@ -303,24 +306,24 @@ function main(mstep::I,numN::I,sigRfac::F,
             evalllh!(lt,lp,difyt,mu_yp,
                      Ktt,Kpt,Kpp,muj0,Sj0,
                      cLL,cLp,Mtt,Mpt,Mtp,Mpp,vect,vecp,
-                     AccT,ret)
+                     AccT,ret,cLtinv)
             ### updated: cLL(L of Ktt) muj0 Sj0<unused below> ret[1](logprior) ret[2](llh) AccT
             #t4 =time() ###
             
             if AccT[1] ### Ktt is PSD
                 try
                     myCholesky!(Sj0,lp,cLp) #updated cLp (L of Sj)
-                    mul!(vecp,inv(cLp),yprds[ith]-muj0)
                     ret[4]=0.0 #logdetSj
                     @inbounds @simd for jj = 1:lp
                         ret[4] += 2.0*log(cLp[jj,jj])
                     end
+                    cLpinv .= cLp
+                    LinearAlgebra.inv!(cLpinv)
+                    mul!(vecp,cLpinv,yprds[ith]-muj0)
                     ret[3] = -0.5 * dot(vecp,vecp)  - 0.5 * ret[4]
                 catch
-                    ret[3] = -1.e+30
+                    nothing
                 end
-            else
-                ret[3]
             end
             ### updated: cLp(L of Sjoint) ret[4](logdetSj)            
             
@@ -331,7 +334,7 @@ function main(mstep::I,numN::I,sigRfac::F,
                 achitT += 1.
                 mujs[ith]=copy(muj0)
                 SLs[ith]= deepcopy(cLp)
-                SLinvs[ith]=deepcopy(inv(cLp))
+                SLinvs[ith]=deepcopy(cLpinv)
                 logdetSjs[ith] = ret[4]
             end
             #t5 = time()  ###
@@ -347,8 +350,7 @@ function main(mstep::I,numN::I,sigRfac::F,
                 thit = ifelse(log(rand()) <= diff, 1,0)
                 if thit == 1
                     yprds[ith] = copy(zerop)
-                    tlogpost = n_logpost
-                    tder=n_der; nder=n_der2
+                    tlogpost = n_logpost;tder=n_der; tder2=n_der2
                     achitY += 1
                 end
             catch
@@ -642,24 +644,8 @@ function calcmuj!(cLinv::LowerTriangular{Float64,Array{Float64,2}},
     mul!(vect,cLinv,difyt)
     mul!(vect,transpose(cLinv),vect)
     mul!(vecp,Kpt,vect)
-    # @inbounds @simd for i =1:lp
-    #     mujoint[i] = mu_yp[i] + vecp[i]
-    # end
     @. mujoint = mu_yp + vecp
     return nothing
-end
-
-function calcSj!(cLinv::LowerTriangular{Float64,Array{Float64,2}},
-                 Kpt::T2,Kpp::T2,lp::Int64,Sjoint::T2,Mpt::T2,Mpp::T2
-                 ) where {T<:Array{Float64,1},T2<:Array{Float64,2}}
-    mul!(Mpt,Kpt,transpose(cLinv))
-    mul!(Mpp,Mpt,transpose(Mpt))    
-    @inbounds @simd for j = 1:lp
-        for i = 1:lp
-            Sjoint[i,j] = Kpp[i,j] - Mpp[i,j] ## minus sign
-        end
-    end
-    nothing
 end
 
 function calcSjMt!(cLinv::LowerTriangular{Float64,Array{Float64,2}},
@@ -751,7 +737,7 @@ end
 function evalllh!(lt::I,lp::I,difyt::T,mu_yp::T,
                   Ktt::T2,Kpt::T2,Kpp::T2,mujoint::T,Sjoint::T2,
                   cLL::L,cLp::L,Mtt::T2,Mpt::T2,Mtp::T2,Mpp::T2,vect::T,vecp::T,
-                  AccT::BA,ret::T
+                  AccT::BA,ret::T,cLinv::L
                   ) where {I<:Int64,F<:Float64,T<:Array{Float64,1},
                            BA<:Array{Bool,1},
                            T2<:Array{Float64,2},
@@ -762,16 +748,17 @@ function evalllh!(lt::I,lp::I,difyt::T,mu_yp::T,
         @inbounds @simd for j = 1:lt
             logdetK += log(cLL[j,j])
         end
-        cLinv = inv(cLL)                 
+        ret[1] = 0.0 ## uniform logprior
+        cLinv .= cLL
+        LinearAlgebra.inv!(cLinv)
         calcmuj!(cLinv,Kpt,Kpp,difyt,mu_yp,lp,mujoint,vect,vecp,Mpt)
         calcSjMt!(cLinv,Kpt,Kpp,lp,Sjoint,Mtt,Mpt,Mtp,Mpp)
-        ret[1] = 0.0 ## uniform logprior
         mul!(vect,cLinv,difyt)
-        ret[2] = -0.5 * dot(vect,vect) - logdetK ### llh
+        ret[2] = -0.5 * dot(vect,vect) - logdetK ### llh       
         AccT[1] = true
         ### updated: cLL(L of Ktt) muj Sj ret[1](logprior) ret[2](llh)
     catch
-        AccT[1] = false; ret[2] = -2.e+30
+        AccT[1] = false; ret[2] = -2.e+20
     end
     nothing 
 end
@@ -779,7 +766,7 @@ end
 function initPH!(lt::I,lp::I,yprd::T,
                  Theta::T,prePH::F,difyt::T,mu_yp::T,
                  Ktt::T2,Kpt::T2,Kpp::T2,mujoint::T,Sjoint::T2,
-                 cLL::L,cLp::L,Mpt::T2,Mpp::T2,vect::T,vecp::T,
+                 cLL::L,cLp::L,Mtt::T2,Mpt::T2,Mtp::T2,Mpp::T2,vect::T,vecp::T,
                  AccT::Array{Bool,1},ret::T
                  ) where {I<:Int64,F<:Float64,T<:Array{Float64,1},
                          T2<:Array{Float64,2},
@@ -791,22 +778,19 @@ function initPH!(lt::I,lp::I,yprd::T,
             logdetK += 2.0*log(cLL[j,j])
         end
         cLinv = inv(cLL)             
-    
         calcmuj!(cLinv,Kpt,Kpp,difyt,mu_yp,lp,mujoint,vect,vecp,Mpt)
-        calcSj!(cLinv,Kpt,Kpp,lp,Sjoint,Mpt,Mpp)
-        
+        calcSjMt!(cLinv,Kpt,Kpp,lp,Sjoint,Mtt,Mpt,Mtp,Mpp)
         ret[1] = 0.0 ## uniform logprior
         mul!(vect,cLinv,difyt)
         ret[2]  = -0.5 * dot(vect,vect) - 0.5*logdetK ### llh
-
         try
             myCholesky!(Sjoint,lp,cLp) # cLp:= L of Sjoint
-            mul!(vecp,cLp,yprd-mujoint)
+            mul!(vecp,inv(cLp),yprd-mujoint)
             ret[3] = -0.5 * dot(vecp,vecp)  - 0.5*logdetSj ### logpost
             ret[4] = logdetSj
         catch
-            ret[3] = -1.e+30
-        end
+            ret[3] = -1.e+20
+        end       
         AccT[1]=ifelse( log(rand()) < ret[1]+ret[2]+ret[3]-prePH,true,false)
     catch
         AccT[1] = false
@@ -855,4 +839,5 @@ function KernelMat!(ktype,Theta,xt::T,lt,xp::T,lp,
     end
     nothing
 end
+
 
