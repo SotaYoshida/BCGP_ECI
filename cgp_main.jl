@@ -231,7 +231,7 @@ function main(mstep::I,numN::I,sigRfac::F,
     AccT = [false]; fac0=[0.0]
     ret = [-1.e+20,-1.e+20,-1.e+20, 1.e+20 ]
     
-    if paramean==true;NDist=Normal(0,0.01);else; NDist=Normal(R,5*sigR);end
+    if paramean==true;NDist=Normal(0,0.1);else; NDist=Normal(R,5*sigR);end
 
     if paramean==true
         pn=sign( 0.5-rand())
@@ -373,7 +373,7 @@ function main(mstep::I,numN::I,sigRfac::F,
             #println(s1,s2,s3)
         end
         #### ~Resampling~
-        if  (tstep == 200 || tstep == 500 ||tstep==1000) && (Monotonic==true || Convex ==true)
+        if  (tstep == 200 || tstep == 500 ) && (Monotonic==true || Convex ==true)
             tmp = Resample(iThetas, yprds, PHs, logp0s, llhs, logposts, ders, mujs, SLs,SLinvs,numN)
             iThetas=copy(tmp[1]); yprds=deepcopy(tmp[2]); PHs=copy(tmp[3]); logp0s=copy(tmp[4]);
             llhs=copy(tmp[5]); logposts=copy(tmp[6]); ders=deepcopy(tmp[7]); mujs=deepcopy(tmp[8])
@@ -381,17 +381,17 @@ function main(mstep::I,numN::I,sigRfac::F,
             if tstep == 200
                 cqY = qY * qYfac
             end
-            if tstep == 500
-                if 100.0*achitY/(numN*(tstep-1)) < 5.0
-                    cqY = 0.05 *cqY
-                elseif 100.0*achitY/(numN*(tstep-1)) < 13.0
-                    cqY = 0.5 *cqY
-                elseif 100.0*achitY/(numN*(tstep-1)) > 55.0
-                    cqY = 100.0 * cqY
-                elseif 100.0*achitY/(numN*(tstep-1)) > 35.0
-                    cqY = 10.0 * cqY
-                end
-            end
+            # if tstep == 500
+            #     if 100.0*achitY/(numN*(tstep-1)) < 5.0
+            #         cqY = 0.05 *cqY
+            #     elseif 100.0*achitY/(numN*(tstep-1)) < 13.0
+            #         cqY = 0.5 *cqY
+            #     elseif 100.0*achitY/(numN*(tstep-1)) > 55.0
+            #         cqY = 100.0 * cqY
+            #     elseif 100.0*achitY/(numN*(tstep-1)) > 35.0
+            #         cqY = 10.0 * cqY
+            #     end
+            # end
         end       
         ####### Adaptive proposals
         # if  500 > tstep > 200
