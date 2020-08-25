@@ -34,7 +34,7 @@ Tau(global strength), Sigma(correlation length), sample weight, ...
 S. Yoshida: "Non-parametric Bayesian approach to extrapolation problems in  configuration interaction methods", Phys. Rev. C 102, 024305 (2020).  
 https://journals.aps.org/prc/abstract/10.1103/PhysRevC.102.024305
 
-One can obtain the published FCI results from  
+One can find published FCI results from  
 ・(N3LO) M. K. G. Kruse, E. D. Jurgenson, P. Navrátil, B. R. Barrett, and W. E. Ormand, Phys. Rev. C 87, 044301 (2013).  
 ・(JISP16/NNLOopt) I. J. Shin, Y. Kim, P. Maris, J. P. Vary, C. Forssén, J. Ro- tureau, and N. Michel, Journal of Physics G: Nuclear and Particle Physics 44, 075103 (2017).  
 
